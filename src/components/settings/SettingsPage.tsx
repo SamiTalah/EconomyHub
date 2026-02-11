@@ -89,6 +89,7 @@ export default function SettingsPage() {
     const text = await file.text();
     const result = await importAllData(text);
     if (result.success) {
+      invalidateRuleCache();
       setImportStatus('Import lyckades! Alla data har återställts.');
       invalidateRuleCache();
       loadData();
