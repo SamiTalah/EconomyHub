@@ -90,6 +90,7 @@ export default function SettingsPage() {
     const result = await importAllData(text);
     if (result.success) {
       setImportStatus('Import lyckades! Alla data har återställts.');
+      invalidateRuleCache();
       loadData();
     } else {
       setImportStatus(`Import misslyckades: ${result.error}`);
@@ -102,6 +103,7 @@ export default function SettingsPage() {
     await db.delete();
     await db.open();
     await seedDatabase();
+    invalidateRuleCache();
     loadData();
     setImportStatus('All data har raderats. Standardkategorier har återskapats.');
   }
