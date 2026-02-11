@@ -89,6 +89,7 @@ export default function SettingsPage() {
     const text = await file.text();
     const result = await importAllData(text);
     if (result.success) {
+      invalidateRuleCache();
       setImportStatus('Import lyckades! Alla data har återställts.');
       loadData();
     } else {
@@ -102,6 +103,7 @@ export default function SettingsPage() {
     await db.delete();
     await db.open();
     await seedDatabase();
+    invalidateRuleCache();
     loadData();
     setImportStatus('All data har raderats. Standardkategorier har återskapats.');
   }
