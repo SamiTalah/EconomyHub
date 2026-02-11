@@ -34,6 +34,20 @@ export class EkonomiDB extends Dexie {
       budgets: '++id, categoryId, month',
       savingsGoals: '++id',
     });
+
+    this.version(2).stores({
+      transactions: '++id, date, categoryId, bankFormat, importBatch, hash',
+      categories: '++id, name, type',
+      categoryRules: '++id, keyword, categoryId',
+      investmentAccounts: '++id, name, type',
+      holdings: '++id, accountId, ticker',
+      holdingLots: '++id, holdingId',
+      assets: '++id, type',
+      liabilities: '++id, type',
+      netWorthSnapshots: '++id, date',
+      budgets: '++id, categoryId, month, [categoryId+month]',
+      savingsGoals: '++id',
+    });
   }
 }
 

@@ -68,7 +68,8 @@ export default function BudgetPage() {
 
     // Check if budget already exists for this category+month
     const existing = await db.budgets
-      .where({ categoryId: newCatId, month: selectedMonth })
+      .where('[categoryId+month]')
+      .equals([newCatId, selectedMonth])
       .first();
     if (existing) {
       await db.budgets.update(existing.id!, { monthlyAmount: amount });
@@ -94,7 +95,10 @@ export default function BudgetPage() {
     if (prevBudgets.length === 0) return;
 
     for (const b of prevBudgets) {
-      const existing = await db.budgets.where({ categoryId: b.categoryId, month: selectedMonth }).first();
+      const existing = await db.budgets
+        .where('[categoryId+month]')
+        .equals([b.categoryId, selectedMonth])
+        .first();
       if (!existing) {
         await db.budgets.add({ categoryId: b.categoryId, monthlyAmount: b.monthlyAmount, month: selectedMonth });
       }
