@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum Chain {
+  ICA
+  COOP
+  WILLYS
+  HEMKOP
+  CITY_GROSS
+  LIDL
+  OTHER
+}
+
+enum StoreFormat {
+  ICA_MAXI
+  ICA_KVANTUM
+  ICA_SUPERMARKET
+  ICA_NARA
+  STORA_COOP
+  COOP
+  COOP_NARA
+  WILLYS
+  WILLYS_HEMMA
+  HEMKOP
+  CITY_GROSS
+  LIDL
+}
+
+enum PriceSource {
+  SEED
+  CSV_UPLOAD
+  ADMIN_ENTRY
+  PARTNER_API
+  AGGREGATOR_IMPORT
+  FLYER_OCR
+  FLYER_MANUAL
+}
+
+enum Freshness {
+  FRESH
+  AGING
+  STALE
+}
+
+enum Category {
+  FRUKT_GRONT
+  MEJERI_AGG
+  KOTT
+  FISK_SKALDJUR
+  CHARK_PALAGG
+  BROD_BAGERI
+  SKAFFERI
+  FRYST
+  DRYCK
+  SNACKS_GODIS
+  BARN_BABY
+  HALSA_SKONHET
+  VEGO
+  HEM_STAD
+  DJUR
+}
+
+enum UnitType {
+  KR_PER_KG
+  KR_PER_L
+  KR_PER_ST
+}
+
+enum FlyerSourceType {
+  UPLOAD
+  AGGREGATOR
+  PARTNER_API
+  ADMIN
+}
+
+enum ParseStatus {
+  PENDING
+  PARSED
+  APPROVED
+  REJECTED
+}
+
+enum MultiBuyType {
+  NONE
+  X_FOR_Y
+  BUY_X_GET_Y
+  PERCENT_OFF
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  EV
+  HYBRID
+}
+
+enum EnergyUnit {
+  L_PER_100KM
+  KWH_PER_100KM
+}
+
+// ─── Models ─────────────────────────────────────────────────
+
+model Store {
+  id        String      @id @default(cuid())
+  name      String
+  chain     Chain
+  format    StoreFormat
+  lat       Float
+  lng       Float
+  city      String      @default("Stockholm")
+  address   String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  regularPrices RegularPrice[]
+  dealFlyers    DealFlyer[]
+
+  @@index([chain])
+  @@index([city])
+  @@index([lat, lng])
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  gtin          String?  @unique
+  nameSv        String
+  brand         String?
+  sizeValue     Float?
+  sizeUnit      String?
+  category      Category
+  subcategory   String
+  dietaryTags   String[]
+  normalizedKey String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  regularPrices     RegularPrice[]
+  dealItems         DealItem[]
+  shoppingListItems ShoppingListItem[]
+
+  @@index([category, subcategory])
+  @@index([nameSv])
+}
+
+model RegularPrice {
+  id           String      @id @default(cuid())
+  storeId      String
+  productId    String
+  priceSek     Float
+  unitPriceSek Float?
+  unitUnit     UnitType?
+  inStock      Boolean     @default(true)
+  observedAt   DateTime
+  source       PriceSource
+  createdAt    DateTime    @default(now())
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, productId, observedAt(sort: Desc)])
+  @@index([observedAt])
+}
+
+model DealFlyer {
+  id            String          @id @default(cuid())
+  storeId       String?
+  sourceType    FlyerSourceType
+  title         String
+  weekStart     DateTime
+  weekEnd       DateTime
+  fetchedAt     DateTime        @default(now())
+  rawAssetPath  String?
+  rawText       String?
+  parseStatus   ParseStatus     @default(PENDING)
+  createdAt     DateTime        @default(now())
+
+  store     Store?     @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  dealItems DealItem[]
+
+  @@index([weekStart, weekEnd])
+  @@index([parseStatus])
+}
+
+model DealItem {
+  id                String       @id @default(cuid())
+  flyerId           String
+  productId         String?
+  normalizedName    String
+  brand             String?
+  sizeValue         Float?
+  sizeUnit          String?
+  dealPriceSek      Float
+  multiBuyType      MultiBuyType @default(NONE)
+  multiBuyX         Int?
+  multiBuyY         Float?
+  conditionsText    String?
+  memberOnly        Boolean      @default(false)
+  limitPerHousehold Int?
+  validFrom         DateTime?
+  validTo           DateTime?
+  unitPriceSek      Float?
+  unitUnit          UnitType?
+  confidenceScore   Int          @default(100)
+  approved          Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+
+  flyer   DealFlyer @relation(fields: [flyerId], references: [id], onDelete: Cascade)
+  product Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([flyerId])
+  @@index([productId])
+  @@index([approved])
+  @@index([normalizedName])
+}
+
+model ShoppingList {
+  id        String             @id @default(cuid())
+  createdAt DateTime           @default(now())
+  items     ShoppingListItem[]
+}
+
+model ShoppingListItem {
+  id               String  @id @default(cuid())
+  listId           String
+  productId        String?
+  freeTextName     String?
+  quantity         Float   @default(1)
+  allowSubstitutes Boolean @default(true)
+
+  list    ShoppingList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  product Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([listId])
+}
+
+model CarProfile {
+  id                   String     @id @default(cuid())
+  fuelType             FuelType
+  consumptionPer100km  Float
+  energyUnit           EnergyUnit
+  energyPricePerUnit   Float
+  currency             String     @default("SEK")
+}
