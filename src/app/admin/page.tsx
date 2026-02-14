@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { Upload, FileSpreadsheet, Activity, Package, Store, Tag } from "lucide-react";
+import { Upload, FileSpreadsheet, Activity, Package, Store, Tag, Plug } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Navigation */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AdminNavCard
           href="/admin/prices/upload"
           icon={<Upload className="h-6 w-6" />}
@@ -41,7 +41,13 @@ export default async function AdminPage() {
           href="/admin/deals"
           icon={<FileSpreadsheet className="h-6 w-6" />}
           title="Erbjudanden"
-          description="Hantera flygblad och veckans deals"
+          description="Flygblad, OCR och veckans deals"
+        />
+        <AdminNavCard
+          href="/admin/connectors"
+          icon={<Plug className="h-6 w-6" />}
+          title="API-kopplingar"
+          description="Hämta priser från ICA, Willys, Coop"
         />
         <AdminNavCard
           href="/admin/health"

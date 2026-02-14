@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Upload, FileText, Check, X, AlertTriangle, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Upload, FileText, Check, X, AlertTriangle, Eye, ChevronDown, ChevronUp, ScanText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OcrReview } from "./ocr-review";
 
 interface DealItemData {
   id: string;
@@ -34,7 +35,7 @@ interface FlyerData {
 }
 
 export function DealsManager({ flyers }: { flyers: FlyerData[] }) {
-  const [activeTab, setActiveTab] = useState<"list" | "upload" | "manual">("list");
+  const [activeTab, setActiveTab] = useState<"list" | "upload" | "manual" | "ocr">("list");
   const [expandedFlyer, setExpandedFlyer] = useState<string | null>(null);
 
   return (
@@ -48,7 +49,10 @@ export function DealsManager({ flyers }: { flyers: FlyerData[] }) {
           <Upload className="h-3.5 w-3.5" /> Importera JSON
         </TabBtn>
         <TabBtn active={activeTab === "manual"} onClick={() => setActiveTab("manual")}>
-          <Plus className="h-3.5 w-3.5" /> Manuell inmatning
+          <Plus className="h-3.5 w-3.5" /> Manuell
+        </TabBtn>
+        <TabBtn active={activeTab === "ocr"} onClick={() => setActiveTab("ocr")}>
+          <ScanText className="h-3.5 w-3.5" /> OCR Flygblad
         </TabBtn>
       </div>
 
@@ -151,6 +155,9 @@ export function DealsManager({ flyers }: { flyers: FlyerData[] }) {
 
       {/* Manual entry */}
       {activeTab === "manual" && <ManualDealEntry />}
+
+      {/* OCR Flygblad */}
+      {activeTab === "ocr" && <OcrReview />}
     </div>
   );
 }

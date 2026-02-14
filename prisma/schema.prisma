@@ -110,16 +110,17 @@ enum EnergyUnit {
 // ─── Models ─────────────────────────────────────────────────
 
 model Store {
-  id        String      @id @default(cuid())
-  name      String
-  chain     Chain
-  format    StoreFormat
-  lat       Float
-  lng       Float
-  city      String      @default("Stockholm")
-  address   String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  name            String
+  chain           Chain
+  format          StoreFormat
+  lat             Float
+  lng             Float
+  city            String      @default("Stockholm")
+  address         String?
+  externalStoreId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   regularPrices RegularPrice[]
   dealFlyers    DealFlyer[]
@@ -127,6 +128,7 @@ model Store {
   @@index([chain])
   @@index([city])
   @@index([lat, lng])
+  @@index([externalStoreId])
 }
 
 model Product {
