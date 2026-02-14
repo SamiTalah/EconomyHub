@@ -516,7 +516,7 @@ async function main() {
       sizeUnit: p.sizeUnit ?? null,
       category: p.category,
       subcategory: p.subcategory,
-      dietaryTags: p.dietaryTags ?? [],
+      dietaryTags: (p.dietaryTags ?? []).join(","),
       gtin: p.gtin ?? null,
       normalizedKey: normalizeProductKey(p.nameSv, p.brand, p.sizeValue, p.sizeUnit),
     })),

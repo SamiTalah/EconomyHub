@@ -62,7 +62,6 @@ export async function optimizeBasket(
         where: {
           nameSv: {
             contains: item.freeTextName!,
-            mode: "insensitive",
           },
         },
       });
@@ -196,7 +195,7 @@ export async function searchProducts(query: string) {
 
   const products = await prisma.product.findMany({
     where: {
-      nameSv: { contains: query, mode: "insensitive" },
+      nameSv: { contains: query },
     },
     take: 10,
     orderBy: { nameSv: "asc" },

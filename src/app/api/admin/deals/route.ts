@@ -48,7 +48,7 @@ async function handleJsonImport(data: DealJsonImport) {
 
   // Find or match store
   let store = await prisma.store.findFirst({
-    where: { name: { contains: data.store_name, mode: "insensitive" } },
+    where: { name: { contains: data.store_name } },
   });
 
   if (!store) {
@@ -89,7 +89,7 @@ async function handleJsonImport(data: DealJsonImport) {
       }
       if (!product) {
         product = await prisma.product.findFirst({
-          where: { nameSv: { contains: item.name, mode: "insensitive" } },
+          where: { nameSv: { contains: item.name } },
         });
       }
 
